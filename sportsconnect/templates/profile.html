@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main text-center" style="max-width:600px; margin:auto;">
+    <div class="card p-4" style="border-radius:16px;">
+        <img src="{{ url_for('uploaded_file', filename=user.profile_pic) if user.profile_pic != 'default.jpg' else url_for('static', filename='img/default.jpg') }}"
+            style="width:130px; height:130px; border-radius:50%; border:5px solid var(--primary); object-fit:cover; margin:auto;">
+        <h2 style="margin:1rem 0 0.5rem; font-size:1.8rem;">{{ user.name }}</h2>
+        <p style="color:#777; margin-bottom:0.5rem;">@{{ user.email.split('@')[0] }}</p>
+        <p style="margin:1rem 0; max-width:500px; line-height:1.6;">{{ user.bio or '' }}</p>
+        <p style="color:#555; font-size:0.95rem;">{{ user.location or 'New York, USA' }}</p>
+
+        <div style="display:flex; justify-content:center; gap:2.5rem; margin:1.5rem 0; font-size:1rem;">
+            <div><strong>{{ follower_count }}</strong><br><small style="color:#777;">Followers</small></div>
+            <div><strong>{{ following_count }}</strong><br><small style="color:#777;">Following</small></div>
+            <div><strong>{{ post_count }}</strong><br><small style="color:#777;">Posts</small></div>
+            <div><strong>{{ event_count }}</strong><br><small style="color:#777;">Events</small></div>
+        </div>
+
+        {% if current_user.id != user.id %}
+        <form method="POST" action="{{ url_for('follow', user_id=user.id) }}" style="display:inline;">
+            {% if is_following %}
+            <button type="submit" formaction="{{ url_for('unfollow', user_id=user.id) }}" class="btn btn-outline-danger"
+                style="border-radius:12px;">Unfollow</button>
+            {% else %}
+            <button type="submit" class="btn btn-primary" style="border-radius:12px;">Follow</button>
+            {% endif %}
+        </form>
+        {% else %}
+        <button id="edit-profile-btn" class="btn btn-outline-primary" style="border-radius:12px; margin-left:1rem;">Edit
+            Profile</button>
+        {% endif %}
+    </div>
+
+    <!-- Edit form hidden initially -->
+    <form id="edit-profile-form" method="POST" enctype="multipart/form-data" 
+        action="{{ url_for('edit_profile', user_id=user.id) }}"  class="card mt-4 p-3"
+        style="display:none; max-width:600px; margin:auto;">
+        <input type="text" name="name" value="{{ user.name }}" required class="form-control mb-3" placeholder="Name">
+        <textarea name="bio" placeholder="Bio" class="form-control mb-3" rows="4">{{ user.bio }}</textarea>
+        <input type="text" name="location" value="{{ user.location }}" placeholder="Location" class="form-control mb-3">
+        <input type="file" name="profile_pic" accept="image/*" class="form-control mb-3">
+        <button type="submit" class="btn btn-primary" style="border-radius:12px;">Save Changes</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("edit-profile-btn")?.addEventListener("click", function () {
+        const form = document.getElementById("edit-profile-form");
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            this.style.display = "none";
+        }
+    });
+</script>
+{% endblock %}

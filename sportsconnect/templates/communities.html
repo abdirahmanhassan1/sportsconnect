@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main">
+    <h1 class="mb-3 fs-2">Discover Your Sporting Communities</h1>
+
+    <form method="GET" class="d-flex mb-4 gap-2">
+        <input type="text" name="q" value="{{ search_query }}" placeholder="Search for communities or sports..."
+            class="form-control rounded-pill" />
+        <button type="submit" class="btn btn-primary rounded-pill">Search</button>
+    </form>
+
+    <h2 class="mb-3">Explore Sports Categories</h2>
+
+    <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
+        {% for c in communities %}
+        <div class="col">
+            <div class="card text-center p-3 shadow-sm h-100">
+                <div style="font-size:3rem; margin-bottom:0.5rem;">{{ c.emoji }}</div>
+                <h4>{{ c.name }}</h4>
+                <p class="text-secondary">{{ c.sport }}</p>
+                <p><strong>{{ c.members|length }}</strong> Members</p>
+                {% if c.id in joined %}
+                <button class="btn btn-outline-secondary mb-2" disabled>Joined</button>
+                {% else %}
+                <a href="{{ url_for('join_community', comm_id=c.id) }}" class="btn btn-primary mb-2">Join</a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <p>No communities found.</p>
+        {% endfor %}
+    </div>
+
+    <h2>My Communities</h2>
+    <div class="d-flex flex-wrap gap-3">
+        {% for c in communities if c.id in joined %}
+        <div class="card p-3 d-flex align-items-center gap-3" style="width:300px; border-radius:12px;">
+            <div style="font-size:2rem;">{{ c.emoji }}</div>
+            <div>
+                <strong>{{ c.name }}</strong><br>
+                <small class="text-muted">{{ c.sport }} • {{ c.members|length }} members</small>
+            </div>
+            <a href="#" class="btn btn-outline-primary ms-auto" style="border-radius:12px;">View</a>
+        </div>
+        {% else %}
+        <p class="text-muted fst-italic">You haven't joined any communities yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

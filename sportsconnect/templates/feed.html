@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <!-- Feed -->
+    <div class="col-lg-8">
+        <!-- Create Post -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <textarea name="content" class="form-control mb-3" rows="3"
+                        placeholder="Share your sports moment..."></textarea>
+                    <div class="d-flex justify-content-between">
+                        <input type="file" name="image" class="form-control form-control-sm" style="width:auto;">
+                        <button type="submit" class="btn btn-primary">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Posts -->
+        {% for post in posts %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <img src="{{ url_for('uploaded_file', filename=post.user.profile_pic) if post.user.profile_pic != 'default.jpg' else url_for('static', filename='img/default.jpg') }}"
+                        class="rounded-circle me-3" style="width:45px; height:45px; object-fit:cover;">
+                    <div>
+                        <strong>{{ post.user.name }}</strong><br>
+                        <small class="text-muted">{{ post.created_at.strftime('%I:%M %p · %b %d') }}</small>
+                    </div>
+                </div>
+                <p>{{ post.content }}</p>
+                {% if post.image %}
+                <img src="{{ url_for('uploaded_file', filename=post.image) }}" class="img-fluid rounded mb-3"
+                    style="max-height:400px; object-fit:cover;">
+                {% endif %}
+                <div class="d-flex justify-content-start gap-4">
+                    <form id="like-form-{{ post.id }}" method="POST"
+                        action="{{ url_for('like_post', post_id=post.id) }}">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="far fa-heart"></i>
+                            Like (<span id="like-count-{{ post.id }}">{{ post.likes|length }}</span>)
+                        </button>
+                    </form>
+                    <button class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="far fa-comment"></i> Comment
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="far fa-share-square"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Sidebar Widgets -->
+    <div class="col-lg-4">
+        <!-- Events only -->
+        <div class="card">
+            <div class="card-body">
+                <h5>Upcoming Events</h5>
+                {% for event in events %}
+                <div class="small mb-2">
+                    <strong>{{ event.title }}</strong><br>
+                    {{ event.date }} · {{ event.location }}
+                    <a href="{{ url_for('join_event', event_id=event.id) }}" class="btn btn-primary btn-sm mt-1">Join
+                        Event</a>
+                </div>
+                {% else %}
+                <p class="text-muted">No upcoming events yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll("form[id^='like-form-']").forEach(form => {
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            fetch(form.action, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const countSpan = form.querySelector("span");
+                    countSpan.textContent = data.likes_count;
+                    if (data.liked) {
+                        form.querySelector("i").classList.remove('far');
+                        form.querySelector("i").classList.add('fas');
+                    } else {
+                        form.querySelector("i").classList.remove('fas');
+                        form.querySelector("i").classList.add('far');
+                    }
+                });
+        });
+    });
+</script>
+{% endblock %}

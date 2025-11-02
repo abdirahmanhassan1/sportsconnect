@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Discover Events</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEvent">Create Event</button>
+</div>
+
+<div class="row g-4">
+    {% for event in events %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <!-- Removed static icon -->
+                <h5>{{ event.title }}</h5>
+                <p class="text-muted small">{{ event.date }}<br>{{ event.location }}</p>
+                <a href="{{ url_for('join_event', event_id=event.id) }}" class="btn btn-primary w-100">Join Event</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>No events found.</p>
+    {% endfor %}
+</div>
+
+<!-- Modal for creating events -->
+<div class="modal fade" id="createEvent">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('events') }}">
+                <div class="modal-header">
+                    <h5>Create Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" name="title" class="form-control mb-3" placeholder="Event Title (emoji allowed)"
+                        required>
+                    <input type="date" name="date" class="form-control mb-3" required>
+                    <input type="text" name="location" class="form-control mb-3" placeholder="Location" required>
+                    <input type="text" name="sport" class="form-control" placeholder="Sport" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
